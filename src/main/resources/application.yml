@@ -1,0 +1,26 @@
+spring:
+  data:
+    redis:
+      host: 192.168.1.9
+      port: 6379
+      database: 1
+  datasource:
+    username: root
+    password: 19859351310
+    url: jdbc:mysql://localhost:3306/book?useSSL=false&charsetEncoding=utf8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        model-name: qwen-max
+        api-key: sk-4d9a8f600ad24543bb3630543f98f64e
+      streaming-chat-model:
+        model-name: qwen-max
+        api-key: sk-4d9a8f600ad24543bb3630543f98f64e
+      embedding-model:
+        model-name: text-embedding-v4
+        api-key: sk-4d9a8f600ad24543bb3630543f98f64e
+bigmodel:
+  api-key: 64df79efc9ae41209b620634f3302dcb.qaUsghecsIqEG6Xq
+
