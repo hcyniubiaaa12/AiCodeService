@@ -12,11 +12,13 @@ import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -30,6 +32,8 @@ class Demo7ApplicationTests {
     private ImageModelFactory imageModelFactory;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
 
 
@@ -78,18 +82,19 @@ class Demo7ApplicationTests {
 
     @Test
     public void asyncCall() {
-        System.out.println("---create task----");
+        System.out.println("---create Task1----");
         String taskId = imageModelFactory.createAsyncTask("生成火星演唱会的图");
-        System.out.println("---wait task done then return image url----");
-        imageModelFactory.waitAsyncTask(taskId);
+
+        String s = imageModelFactory.waitAsyncTask(taskId);
+        System.out.println(s);
     }
 
 
 
     @Test
     void test() {
-        String s = String.valueOf(aiCodeHelperService.chat("1","你好"));
-        System.out.println(s);
+
+
     }
 
 }

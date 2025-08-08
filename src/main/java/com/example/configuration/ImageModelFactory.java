@@ -17,9 +17,8 @@ public class ImageModelFactory {
     public String createAsyncTask(String prompt) {
         ImageSynthesisParam param = ImageSynthesisParam.builder()
                 .apiKey(key)
-                .model(ImageSynthesis.Models.WANX_V1)
+                .model("wan2.2-t2i-flash")
                 .prompt(prompt)
-                .style("<watercolor>")
                 .n(1)
                 .size("1024*1024")
                 .build();
@@ -37,17 +36,18 @@ public class ImageModelFactory {
 
     }
 
-    public void waitAsyncTask(String taskId) {
+    public String waitAsyncTask(String taskId) {
         ImageSynthesis imageSynthesis = new ImageSynthesis();
         ImageSynthesisResult result = null;
         try {
             //环境变量配置后，可在这里将apiKey设置为null
             result = imageSynthesis.wait(taskId, key);
+            return JsonUtils.toJson(result.getOutput());
         } catch (ApiException | NoApiKeyException e) {
             throw new RuntimeException(e.getMessage());
         }
-        System.out.println(JsonUtils.toJson(result));
-        System.out.println(JsonUtils.toJson(result.getOutput()));
+
+
     }
 
 

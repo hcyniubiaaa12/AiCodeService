@@ -24,9 +24,6 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
 
     public PersistentChatMemoryStore(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-
-
-
     }
 
 
@@ -46,7 +43,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
         String key = "chat:messages:" + id.toString();
         String messages = ChatMessageSerializer.messagesToJson(list);
 
-        redisTemplate.opsForValue().set(key, messages,2, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, messages,30, TimeUnit.MINUTES);
 
     }
 

@@ -8,43 +8,64 @@ import dev.langchain4j.agent.tool.Tool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class InterviewQuestionTool {
     @Autowired
     private BooksService booksService;
+    @Autowired
+    private ImageModelFactory imageModelFactory;
+
     @Tool("""
-    根据用户提供的书名查询书籍的详细信息，包括作者和剩余库存。
-    
-    适用场景：
-    - 用户询问某本书的库存数量（如“有多少本”、“还有几本”、“剩多少”）
-    - 用户询问作者信息（如“是谁写的”、“作者是谁”）
-    - 用户确认是否存在（如“有吗”、“有没有”、“在不在”）
-    - 用户使用简称、部分名称或系列名（如“jojo”、“不灭钻石”、“黄金之风”）
-    
-    匹配规则：
-    - 支持模糊匹配：只要书名中包含用户提供的关键词，就应调用此工具
-    - 支持系列简称：如“jojo”可匹配《JOJO的奇妙冒险》全系列
-    - 即使数据库中没有完全匹配的书籍，也应调用此工具，由后端返回“未找到”
-    
-    示例问题：
-    - 《不灭钻石》还有多少本？
-    - jojo的书有多少卷？
-    - 星尘远征军是谁写的？
-    - 有《黄金之风》吗？
-    - 我想找一本叫“石之海”的书
-     仅根据数库中已有的书籍信息，查询指定书名的作者和剩余库存。据
-      只返回与用户查询书名直接匹配的结果，不要推测、不要联想其他作品。
-    """)
-    public String askTool( @P("书名") String title){
+            【重要】此工具仅用于查询书籍信息，禁止提及购买、预订、预留、购买链接、价格、会员优惠等任何销售相关行为。
+                
+            功能：根据书名查询书籍的作者、简介和剩余库存。
+            行为规范：
+            - 只能回答“有几本”、“作者是谁”、“讲什么”这类问题
+            - 绝对不能建议用户“尽快预订”、“我可以帮您预留”、“联系管理员购买”等
+            - 如果用户想买或预留，请回答：“本系统仅提供查询服务，不支持购买或预留。”
+                
+            匹配规则：
+            - 支持模糊匹配（如“jojo”可匹配《JOJO的奇妙冒险》）
+            - 支持简称、系列名、部分名称
+            - 即使未找到，也应返回“未找到相关书籍”
+                
+            示例问题：
+            - 《不灭钻石》还有多少本？
+            - 鸽子神的救赎讲的是啥？
+            - jojo的书有多少卷？
+            - 星尘远征军是谁写的？
+            - 有《黄金之风》吗？
+            如果没有书的时候的返回格式:
+            -近期将会进货尽情期待 
+            返回格式：
+            - 书名：xxx
+            - 作者：xxx
+            - 简介：xxx
+            - 剩余库存：x 本
+            -如有喜欢可以在次平台购买订阅
+            """)
+    public String askTool(@P("书名") String title) {
         System.out.println("✅ askTool 被调用了！title = " + title); // 加日志
-        Books book= booksService.getOne(new UpdateWrapper<Books>().like("title", title));
+        Books book = booksService.getOne(new UpdateWrapper<Books>().like("title", title));
         if (book == null) {
-             return "未找到与 \"" + title + "\" 相关的书籍。"
+            return "未找到与 \"" + title + "\" 相关的书籍。"
                     + "请确认书名是否准确，或尝试更具体的名称。";
         }
-        return "书名："+book.getTitle()+"作者："+book.getAuthor()+"剩余库存："+book.getAvailableQuantity();
+        return "书名：" + book.getTitle() + "作者：" + book.getAuthor() + "这本书描述的是:" + book.getDescription() + "剩余库存：" + book.getAvailableQuantity();
+    }
 
+    @Tool("此工具仅用于查询书籍信息，禁止提及购买、预订、预留、购买链接、价格、会员优惠等任何销售相关行为。")
+    public List<Books> listBooks() {
+        System.out.println("✅ listBooks 被调用了！");
+        return booksService.list();
+    }
 
-
+    @Tool("仅生成用户描述对应的图片，不提供任何文字说明、解释、引导语或额外回复。")
+    public String generateImage(String prompt) {
+        String taskId = imageModelFactory.createAsyncTask(prompt);
+        String s = imageModelFactory.waitAsyncTask(taskId);
+        return s;
     }
 }
